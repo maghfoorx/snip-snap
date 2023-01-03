@@ -3,8 +3,10 @@ import { useState } from "react";
 interface PasteBinType {
   id: number;
   date: Date;
-  pasteBody: string;
+  title: null | string;
+  body: string;
 }
+
 export default function MainContent(): JSX.Element {
   const [pasteBinInput, setPasteBinInput] = useState<string>("");
 
