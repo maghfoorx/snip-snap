@@ -38,7 +38,12 @@ export default function MainContent(): JSX.Element {
   const postPastes = async (newBody: string, newTitle?: string) => {
     console.log("postPastes function is running!");
     try {
+      if(newBody.length < 1) {
+        alert("You can't post an empty snap bruh😂😂😂")
+      }
+      else {
       await axios.post(url + "/pastes", { body: newBody, title: newTitle });
+      }
     } catch (error) {
       console.error("Woops... issue with POST request: ", error);
     }
