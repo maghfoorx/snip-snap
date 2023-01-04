@@ -18,7 +18,6 @@ export default function MainContent(): JSX.Element {
   const [pasteBinTitle, setPasteBinTitle] = useState<string>("");
   const [allData, setAllData] = useState<PasteBinType[]>([]);
 
-
   useEffect(() => {
     getPastes();
     console.log(allData);
@@ -60,38 +59,49 @@ export default function MainContent(): JSX.Element {
   }
 
   const SnapItem: React.FC<SnapProps> = (props: SnapProps) => {
-    const sliceLength = 450
-    const {snap} = props
+    const sliceLength = 450;
+    const { snap } = props;
     // const [isExpanded, setIsExpanded] = useState<boolean>(false)
-    const [fullBody, setFullBody] = useState("")
+    const [fullBody, setFullBody] = useState("");
     const handleReadMore = (body: string) => {
-      setFullBody(body.slice(sliceLength, body.length))
+      setFullBody(body.slice(sliceLength, body.length));
       if (fullBody.length > 0) {
-        setFullBody("")
+        setFullBody("");
       }
-    }
+    };
     return (
       <>
-      <div key={snap.id}>
-                <p>
-                  {snap.title ? (
-                    <>
-                      {snap.title} | {snap.date}
-                    </>
-                  ) : (
-                    <>{snap.date}</>
-                  )}
-                </p>
-                <p>{snap.body.slice(0, sliceLength)}<span>{fullBody}</span></p>
-                {snap.body.length > sliceLength && fullBody.length < 1 && <button value={fullBody} onClick={() => handleReadMore(snap.body)}>More</button>}
-                {fullBody.length > 0 && <button value={fullBody} onClick={() => handleReadMore(snap.body)}>Less</button>}
-                {/* <p className={isExpanded ? "" : "expanded-text"}>{snap.body}</p>
+        <div key={snap.id}>
+          <p>
+            {snap.title ? (
+              <>
+                {snap.title} | {snap.date}
+              </>
+            ) : (
+              <>{snap.date}</>
+            )}
+          </p>
+          <p>
+            {snap.body.slice(0, sliceLength)}
+            <span>{fullBody}</span>
+          </p>
+          {snap.body.length > sliceLength && fullBody.length < 1 && (
+            <button value={fullBody} onClick={() => handleReadMore(snap.body)}>
+              More
+            </button>
+          )}
+          {fullBody.length > 0 && (
+            <button value={fullBody} onClick={() => handleReadMore(snap.body)}>
+              Less
+            </button>
+          )}
+          {/* <p className={isExpanded ? "" : "expanded-text"}>{snap.body}</p>
                 {snap.body.length > 450 && <button onClick={handleReadMore} className="read-more-button">more</button>} */}
-                <hr />
-              </div>
+          <hr />
+        </div>
       </>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -114,10 +124,11 @@ export default function MainContent(): JSX.Element {
       {allData.length > 0 && (
         <>
           <h1>Snips & Snaps</h1>
-          {allData.map((el) => (<SnapItem key={el.id} snap={el} />))}
+          {allData.map((el) => (
+            <SnapItem key={el.id} snap={el} />
+          ))}
         </>
       )}
     </>
   );
 }
-
