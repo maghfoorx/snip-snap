@@ -1,0 +1,13 @@
+.logo-image {
+    animation: rotation-anim 2s linear alternate infinite;
+}
+
+@keyframes rotation-anim {
+    0% {
+        transform: rotateZ(135deg);
+    }
+    100% {
+        transform: rotateZ(225deg);
+      }
+
+}

@@ -110,7 +110,7 @@ export default function MainContent(): JSX.Element {
 
   return (
     <>
-      <h1>WELCOME TO SNIP SNAP</h1>
+      <h1>WELCOME TO SNIP SNAP <img src="../logo.png" alt="" className="logo-image"/></h1>
       <form onSubmit={handlePost}>
         <input
           placeholder="title"
