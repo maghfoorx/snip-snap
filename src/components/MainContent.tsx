@@ -18,6 +18,7 @@ export default function MainContent(): JSX.Element {
   const [pasteBinTitle, setPasteBinTitle] = useState<string>("");
   const [allData, setAllData] = useState<PasteBinType[]>([]);
 
+
   useEffect(() => {
     getPastes();
     console.log(allData);
@@ -53,9 +54,48 @@ export default function MainContent(): JSX.Element {
     getPastes();
   };
 
+  //creating a function for individual snaps
+  interface SnapProps {
+    snap: PasteBinType;
+  }
+
+  const SnapItem: React.FC<SnapProps> = (props: SnapProps) => {
+    const sliceLength = 450
+    const {snap} = props
+    // const [isExpanded, setIsExpanded] = useState<boolean>(false)
+    const [fullBody, setFullBody] = useState("")
+    const handleReadMore = (body: string) => {
+      setFullBody(body.slice(sliceLength, body.length))
+      if (fullBody.length > 0) {
+        setFullBody("")
+      }
+    }
+    return (
+      <>
+      <div key={snap.id}>
+                <p>
+                  {snap.title ? (
+                    <>
+                      {snap.title} | {snap.date}
+                    </>
+                  ) : (
+                    <>{snap.date}</>
+                  )}
+                </p>
+                <p>{snap.body.slice(0, sliceLength)}<span>{fullBody}</span></p>
+                {snap.body.length > sliceLength && fullBody.length < 1 && <button value={fullBody} onClick={() => handleReadMore(snap.body)}>More</button>}
+                {fullBody.length > 0 && <button value={fullBody} onClick={() => handleReadMore(snap.body)}>Less</button>}
+                {/* <p className={isExpanded ? "" : "expanded-text"}>{snap.body}</p>
+                {snap.body.length > 450 && <button onClick={handleReadMore} className="read-more-button">more</button>} */}
+                <hr />
+              </div>
+      </>
+    )
+  }
+
   return (
     <>
-      <h1>WELCOME TO PASTEBINS</h1>
+      <h1>WELCOME TO SNIP SNAP</h1>
       <form onSubmit={handlePost}>
         <input
           placeholder="title"
@@ -73,26 +113,11 @@ export default function MainContent(): JSX.Element {
       </form>
       {allData.length > 0 && (
         <>
-          <h1>PasteBins</h1>
-          {allData.map((el) => {
-            return (
-              <div key={el.id}>
-                <p>
-                  {el.title ? (
-                    <>
-                      {el.title} | {el.date}
-                    </>
-                  ) : (
-                    <>{el.date}</>
-                  )}
-                </p>
-                <p>{el.body.slice(0, 450)}</p>
-                <hr />
-              </div>
-            );
-          })}
+          <h1>Snips & Snaps</h1>
+          {allData.map((el) => (<SnapItem key={el.id} snap={el} />))}
         </>
       )}
     </>
   );
 }
+
