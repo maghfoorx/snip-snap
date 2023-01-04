@@ -35,25 +35,12 @@ export default function MainContent(): JSX.Element {
     const { snap, allCommProps } = props;
 
     const [commentBody, setCommentBody] = useState<string>("");
-    const [comments, setComments] = useState<PasteComment[]>([]);
+    const [comments, setComments] = useState<PasteComment[]>(
+      allCommProps.filter((el) => el.paste_id === snap.id)
+    );
     const [CommsVis, setCommsVis] = useState<boolean>(false);
     const [fullBody, setFullBody] = useState("");
 
-    //GET comments from API
-    // const getComments = async () => {
-    //   try {
-    //     const response = await axios.get(url + `/comments/${snap.id}`);
-    //     setAllComments(response.data);
-    //   } catch (error) {
-    //     console.error("Woops... issue with GET comments request: ", error);
-    //   }
-    // };
-    const handleViewComments = (id: number) => {
-      setComments(allCommProps.filter((el) => el.paste_id === id));
-      setCommsVis(true);
-      console.log(comments);
-      // console.log(CommsVis)
-    };
     const handleReadMore = (body: string) => {
       setFullBody(body.slice(sliceLength, body.length));
       if (fullBody.length > 0) {
@@ -63,9 +50,6 @@ export default function MainContent(): JSX.Element {
 
     return (
       <div key={snap.id}>
-        {comments.map((el) => {
-          return <p key={el.comment_id}>{el.comment_body}</p>;
-        })}
         <p>
           {snap.title ? (
             <>
@@ -86,24 +70,26 @@ export default function MainContent(): JSX.Element {
             </button>
           )}
           <button>Leave a comment</button>
-          {/* {comments.length > 0 && (
-              <button onClick={handleViewComments}>View comments</button>
-            )} */}
-          <button onClick={() => handleViewComments(snap.id)}>
-            View comments
-          </button>
-          {/* {CommsVis && 
-            <div>{comments.map((el)=> {
-              return(
-                <p >{el.commentBody}</p>
-              )
-            })}</div>} */}
+          {comments.length > 0 && !CommsVis && (
+            <button onClick={() => setCommsVis(!CommsVis)}>
+              View comments
+            </button>
+          )}
+          {comments.length > 0 && CommsVis && (
+            <button onClick={() => setCommsVis(!CommsVis)}>
+              Hide Comments
+            </button>
+          )}
         </span>
         {fullBody.length > 0 && (
           <button value={fullBody} onClick={() => handleReadMore(snap.body)}>
             Less
           </button>
         )}
+        {CommsVis &&
+          comments.map((el) => {
+            return <p key={el.comment_id}>{el.comment_body}</p>;
+          })}
         <hr />
       </div>
     );
@@ -161,9 +147,6 @@ export default function MainContent(): JSX.Element {
 
   return (
     <>
-      {allComments.map((el) => {
-        return <p key={el.comment_id}>{el.comment_body}</p>;
-      })}
       <h1>
         WELCOME TO SNIP SNAP{" "}
         <img src="../logo.png" alt="" className="logo-image" />
