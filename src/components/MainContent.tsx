@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 const url =
@@ -37,6 +37,7 @@ export default function MainContent(): JSX.Element {
     const { snap, allCommProps } = props;
 
     const [commentBody, setCommentBody] = useState<string>("");
+    const [leaveCommentVis, setLeaveCommentVis] = useState<boolean>(false)
     const [comments, setComments] = useState<PasteComment[]>(
       allCommProps.filter((el) => el.paste_id === snap.id)
     );
@@ -73,6 +74,29 @@ export default function MainContent(): JSX.Element {
     const handleDeletePasteButton = (id: number) => {
       deletePaste(id).then(() => getPastes());
     };
+    const postComment = async (id: number, newComment: string) => {
+      try {
+        await axios.post(`${url}/comments`, { pasteID: id, commentBody: newComment })
+      }
+      catch (error) {
+        console.error(error);
+      }
+    }
+    const handleLeaveComment = (id: number, comment: string) => {
+      console.log("Leave comment activated")
+      if(comment.length < 1) {
+        alert("you can't post an empty comment either bro omd...")
+      }
+      else {
+        postComment(id, comment)
+        setCommentBody('')
+        getAllComments()
+        console.log(comments)
+        setCommsVis(true)
+        
+        console.log(CommsVis)
+      }
+    }
 
     return (
       <div key={snap.id}>
@@ -96,7 +120,7 @@ export default function MainContent(): JSX.Element {
               More
             </button>
           )}
-          <button>Leave a comment</button>
+          <button onClick={() => setLeaveCommentVis(!leaveCommentVis)}>Leave a comment</button>
           {comments.length > 0 && !CommsVis && (
             <button onClick={() => setCommsVis(!CommsVis)}>
               View comments
@@ -113,8 +137,14 @@ export default function MainContent(): JSX.Element {
             Less
           </button>
         )}
-        {CommsVis &&
-          comments.map((el) => {
+        <br />
+        {leaveCommentVis && <div>
+          <textarea onChange={(e) => setCommentBody(e.target.value)} value={commentBody}>
+          </textarea>
+          <button  onClick={() => handleLeaveComment(snap.id, commentBody)}>📩</button>
+        </div>}
+        {CommsVis && <div>
+          {comments.map((el) => {
             return (
               <>
                 <p key={el.comment_id}>{el.comment_body}</p>
@@ -125,7 +155,7 @@ export default function MainContent(): JSX.Element {
                 </button>
               </>
             );
-          })}
+          })}</div>}
         <hr />
       </div>
     );
@@ -216,3 +246,4 @@ export default function MainContent(): JSX.Element {
     </>
   );
 }
+
