@@ -1,3 +1,9 @@
+body {
+  background-color: #effffa;
+  font-family: "Martian Mono";
+  text-align: center;
+}
+
 .logo-image {
   animation: rotation-anim 2s linear alternate infinite;
 }
@@ -9,4 +15,40 @@
   100% {
     transform: rotateZ(225deg);
   }
+}
+
+.snap-form {
+  display: grid;
+  grid-template-areas:
+    "title"
+    "body"
+    "submit";
+  width: 50%;
+  margin: 0 auto;
+  grid-row-gap: 20px;
+}
+
+.input-title,
+.input-body {
+  font-size: 1rem;
+}
+
+.input-title {
+  grid-area: title;
+  width: 50%;
+  margin: 0 auto;
+  font-family: "Martian Mono";
+  padding: 1rem;
+}
+
+.input-body {
+  grid-area: body;
+  height: 100px;
+}
+
+.submit-button {
+  grid-area: submit;
+  margin: 0 auto;
+  height: 50px;
+  width: 70px;
 }

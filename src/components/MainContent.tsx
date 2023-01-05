@@ -30,6 +30,8 @@ export default function MainContent(): JSX.Element {
     snap: PasteBinType;
     allCommProps: PasteComment[];
   }
+
+  //creating a single component for an individual snap
   const SnapItem: React.FC<SnapProps> = (props: SnapProps) => {
     const sliceLength = 450;
     const { snap, allCommProps } = props;
@@ -48,6 +50,30 @@ export default function MainContent(): JSX.Element {
       }
     };
 
+    //creating a function the deletes a comment
+    const deleteComment = async (id: number) => {
+      try {
+        await axios.delete(`${url}/comments/${id}`);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const handleDeleteCommentButton = (id: number) => {
+      deleteComment(id).then(() => getAllComments());
+    };
+
+    //creating a function to handle deleting a paste and its comments
+    const deletePaste = async (id: number) => {
+      try {
+        await axios.delete(`${url}/pastes/${id}`);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const handleDeletePasteButton = (id: number) => {
+      deletePaste(id).then(() => getPastes());
+    };
+
     return (
       <div key={snap.id}>
         <p>
@@ -59,6 +85,7 @@ export default function MainContent(): JSX.Element {
             <>{snap.date}</>
           )}
         </p>
+        <button onClick={() => handleDeletePasteButton(snap.id)}>❌</button>
         <p>
           {snap.body.slice(0, sliceLength)}
           <span>{fullBody}</span>
@@ -88,7 +115,16 @@ export default function MainContent(): JSX.Element {
         )}
         {CommsVis &&
           comments.map((el) => {
-            return <p key={el.comment_id}>{el.comment_body}</p>;
+            return (
+              <>
+                <p key={el.comment_id}>{el.comment_body}</p>
+                <button
+                  onClick={() => handleDeleteCommentButton(el.comment_id)}
+                >
+                  🗑️
+                </button>
+              </>
+            );
           })}
         <hr />
       </div>
@@ -151,20 +187,23 @@ export default function MainContent(): JSX.Element {
         WELCOME TO SNIP SNAP{" "}
         <img src="../logo.png" alt="" className="logo-image" />
       </h1>
-      <form onSubmit={handlePost}>
+      <form onSubmit={handlePost} className="snap-form">
         <input
+          className="input-title"
           placeholder="title"
           type="text"
           value={pasteBinTitle}
           onChange={(e) => setPasteBinTitle(e.target.value)}
         />
-        <input
-          placeholder="body"
-          type="text"
+        <textarea
+          className="input-body"
+          placeholder="Type your paste..."
           value={pasteBinBody}
           onChange={(e) => setPasteBinBody(e.target.value)}
-        />
-        <button type="submit">Post</button>
+        ></textarea>
+        <button type="submit" className="submit-button">
+          Post
+        </button>
       </form>
       {allData.length > 0 && (
         <>
