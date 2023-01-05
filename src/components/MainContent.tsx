@@ -37,7 +37,7 @@ export default function MainContent(): JSX.Element {
     const { snap, allCommProps } = props;
 
     const [commentBody, setCommentBody] = useState<string>("");
-    const [leaveCommentVis, setLeaveCommentVis] = useState<boolean>(false);
+    const [leaveCommentVis, setLeaveCommentVis] = useState<boolean>(true);
     const [comments, setComments] = useState<PasteComment[]>(
       allCommProps.filter((el) => el.paste_id === snap.id)
     );
@@ -84,6 +84,10 @@ export default function MainContent(): JSX.Element {
         console.error(error);
       }
     };
+    const handleOpenComments = () => {
+      // setCommsVis(!CommsVis)
+      // setLeaveCommentVis(!leaveCommentVis)
+    };
     const handleLeaveComment = (id: number, comment: string) => {
       console.log("Leave comment activated");
       if (comment.length < 1) {
@@ -93,10 +97,9 @@ export default function MainContent(): JSX.Element {
         setCommentBody("");
         getAllComments();
         console.log(comments);
-        setCommsVis(true);
-
         console.log(CommsVis);
       }
+      //setCommsVis(true);
     };
 
     return (
@@ -109,8 +112,9 @@ export default function MainContent(): JSX.Element {
           ) : (
             <>{snap.date}</>
           )}
+          <span><button className="del-com-btn" onClick={() => handleDeletePasteButton(snap.id)}>❌</button></span>
         </p>
-        <button onClick={() => handleDeletePasteButton(snap.id)}>❌</button>
+        
         <p>
           {snap.body.slice(0, sliceLength)}
           <span>{fullBody}</span>
@@ -121,18 +125,12 @@ export default function MainContent(): JSX.Element {
               More
             </button>
           )}
-          <button onClick={() => setLeaveCommentVis(!leaveCommentVis)}>
-            Leave a comment
-          </button>
+          <button onClick={handleOpenComments}>Leave a comment</button>
           {comments.length > 0 && !CommsVis && (
-            <button onClick={() => setCommsVis(!CommsVis)}>
-              View comments
-            </button>
+            <button onClick={handleOpenComments}>View comments</button>
           )}
           {comments.length > 0 && CommsVis && (
-            <button onClick={() => setCommsVis(!CommsVis)}>
-              Hide Comments
-            </button>
+            <button onClick={handleOpenComments}>Hide Comments</button>
           )}
         </span>
         {fullBody.length > 0 && (
@@ -152,22 +150,28 @@ export default function MainContent(): JSX.Element {
             </button>
           </div>
         )}
-        {CommsVis && (
-          <div>
-            {comments.map((el) => {
-              return (
-                <>
-                  <p key={el.comment_id}>{el.comment_body}</p>
-                  <button
-                    onClick={() => handleDeleteCommentButton(el.comment_id)}
-                  >
-                    🗑️
-                  </button>
-                </>
-              );
-            })}
-          </div>
-        )}
+        {/* {CommsVis &&  */}
+        <div>
+          <h3>Comments</h3>
+          {comments.map((el) => {
+            return (
+              <>
+                <p key={el.comment_id}>
+                  {el.comment_body}
+                  <span>
+                    <button
+                      className="del-com-btn"
+                      onClick={() => handleDeleteCommentButton(el.comment_id)}
+                    >
+                      🗑️
+                    </button>
+                  </span>
+                </p>
+              </>
+            );
+          })}
+        </div>
+        {/* } */}
         <hr />
       </div>
     );
