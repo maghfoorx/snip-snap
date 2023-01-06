@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const url =
   process.env.NODE_ENV === "production"
@@ -29,12 +29,13 @@ export default function MainContent(): JSX.Element {
   interface SnapProps {
     snap: PasteBinType;
     allCommProps: PasteComment[];
+    handleSubmitEditPaste: (id: number, message: string) => void;
   }
 
   //creating a single component for an individual snap
   const SnapItem: React.FC<SnapProps> = (props: SnapProps) => {
     const sliceLength = 450;
-    const { snap, allCommProps } = props;
+    const { snap, allCommProps, handleSubmitEditPaste } = props;
 
     const [commentBody, setCommentBody] = useState<string>("");
     const [leaveCommentVis, setLeaveCommentVis] = useState<boolean>(false);
@@ -43,15 +44,12 @@ export default function MainContent(): JSX.Element {
       allCommProps.filter((el) => el.paste_id === snap.id)
     );
     const [fullBody, setFullBody] = useState("");
+    const [editPaste, setEditPaste] = useState<boolean>(false);
+    const [editPasteText, setEditePasteText] = useState<string>(snap.body);
 
-    // const previousCommentsLength = useRef(comments.length)
     // useEffect(() => {
-    //   if (comments.length !== previousCommentsLength.current) {
-    //     previousCommentsLength.current = comments.length;
-    //     setCommsVis(true);
-    //     setLeaveCommentVis(true)
-    //   }
-    // }, [comments.length]);
+    //   getPastes();
+    // }, [editPasteText])
 
     const handleReadMore = (body: string) => {
       setFullBody(body.slice(sliceLength, body.length));
@@ -97,20 +95,24 @@ export default function MainContent(): JSX.Element {
       if (comment.length < 1) {
         alert("you can't post an empty comment either bro omd...");
       } else {
-        postComment(id, comment);
+        postComment(id, comment)
+          .then(() => getAllComments())
+          .then(() => {
+            if (!CommsVis) {
+              handleOpenComments();
+            }
+          });
         setCommentBody("");
-        getAllComments();
       }
-      // setLeaveCommentVis(false);
-      // setCommsVis(false);
-      // handleOpenComments();
-      // console.log(CommsVis);
     };
 
     const handleOpenComments = () => {
       setCommsVis(!CommsVis);
       setLeaveCommentVis(!leaveCommentVis);
-      console.log(CommsVis, leaveCommentVis);
+    };
+
+    const handleEditPasteButton = () => {
+      setEditPaste(true);
     };
 
     return (
@@ -130,13 +132,33 @@ export default function MainContent(): JSX.Element {
             >
               ❌
             </button>
+            <button
+              className="del-com-btn"
+              onClick={() => handleEditPasteButton()}
+            >
+              📝
+            </button>
           </span>
         </p>
 
-        <p>
-          {snap.body.slice(0, sliceLength)}
-          <span>{fullBody}</span>
-        </p>
+        {editPaste ? (
+          <>
+            <textarea
+              value={editPasteText}
+              onChange={(e) => setEditePasteText(e.target.value)}
+            ></textarea>
+            <button
+              onClick={() => handleSubmitEditPaste(snap.id, editPasteText)}
+            >
+              save
+            </button>
+          </>
+        ) : (
+          <p>
+            {snap.body.slice(0, sliceLength)}
+            <span>{fullBody}</span>
+          </p>
+        )}
         <span>
           {snap.body.length > sliceLength && fullBody.length < 1 && (
             <button value={fullBody} onClick={() => handleReadMore(snap.body)}>
@@ -163,7 +185,12 @@ export default function MainContent(): JSX.Element {
               onChange={(e) => setCommentBody(e.target.value)}
               value={commentBody}
             ></textarea>
-            <button onClick={() => handleSubmitComment(snap.id, commentBody)}>
+            <button
+              onClick={() => {
+                handleSubmitComment(snap.id, commentBody);
+                setEditPaste(!editPaste);
+              }}
+            >
               📩
             </button>
           </div>
@@ -238,10 +265,25 @@ export default function MainContent(): JSX.Element {
     e.preventDefault();
     pasteBinTitle === ""
       ? postPastes(pasteBinBody)
-      : postPastes(pasteBinBody, pasteBinTitle);
+      : postPastes(pasteBinBody, pasteBinTitle).then(() => getPastes());
     setPasteBinBody("");
     setPasteBinTitle("");
-    getPastes();
+  };
+
+  //this is the edit request to edit a paste
+  const putEditedPaste = async (id: number, editedMessage: string) => {
+    try {
+      axios.put(`${url}/pastes`, { body: editedMessage, id: id });
+    } catch (error) {
+      console.log("failed to carry out request");
+    }
+  };
+
+  //this function handles
+  const handleSubmitEditPaste = (id: number, message: string) => {
+    putEditedPaste(id, message)
+      .then(() => getPastes())
+      .then(() => getPastes());
   };
 
   return (
@@ -272,7 +314,12 @@ export default function MainContent(): JSX.Element {
         <>
           <h1>Snips & Snaps</h1>
           {allData.map((el) => (
-            <SnapItem key={el.id} snap={el} allCommProps={allComments} />
+            <SnapItem
+              key={el.id}
+              snap={el}
+              allCommProps={allComments}
+              handleSubmitEditPaste={handleSubmitEditPaste}
+            />
           ))}
         </>
       )}
