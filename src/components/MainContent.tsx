@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 const url =
@@ -37,12 +37,21 @@ export default function MainContent(): JSX.Element {
     const { snap, allCommProps } = props;
 
     const [commentBody, setCommentBody] = useState<string>("");
-    const [leaveCommentVis, setLeaveCommentVis] = useState<boolean>(true);
+    const [leaveCommentVis, setLeaveCommentVis] = useState<boolean>(false);
+    const [CommsVis, setCommsVis] = useState<boolean>(false);
     const [comments, setComments] = useState<PasteComment[]>(
       allCommProps.filter((el) => el.paste_id === snap.id)
     );
-    const [CommsVis, setCommsVis] = useState<boolean>(false);
     const [fullBody, setFullBody] = useState("");
+
+    // const previousCommentsLength = useRef(comments.length)
+    // useEffect(() => {
+    //   if (comments.length !== previousCommentsLength.current) {
+    //     previousCommentsLength.current = comments.length;
+    //     setCommsVis(true);
+    //     setLeaveCommentVis(true)
+    //   }
+    // }, [comments.length]);
 
     const handleReadMore = (body: string) => {
       setFullBody(body.slice(sliceLength, body.length));
@@ -84,22 +93,24 @@ export default function MainContent(): JSX.Element {
         console.error(error);
       }
     };
-    const handleOpenComments = () => {
-      // setCommsVis(!CommsVis)
-      // setLeaveCommentVis(!leaveCommentVis)
-    };
-    const handleLeaveComment = (id: number, comment: string) => {
-      console.log("Leave comment activated");
+    const handleSubmitComment = (id: number, comment: string) => {
       if (comment.length < 1) {
         alert("you can't post an empty comment either bro omd...");
       } else {
         postComment(id, comment);
         setCommentBody("");
         getAllComments();
-        console.log(comments);
-        console.log(CommsVis);
       }
-      //setCommsVis(true);
+      // setLeaveCommentVis(false);
+      // setCommsVis(false);
+      // handleOpenComments();
+      // console.log(CommsVis);
+    };
+
+    const handleOpenComments = () => {
+      setCommsVis(!CommsVis);
+      setLeaveCommentVis(!leaveCommentVis);
+      console.log(CommsVis, leaveCommentVis);
     };
 
     return (
@@ -112,9 +123,16 @@ export default function MainContent(): JSX.Element {
           ) : (
             <>{snap.date}</>
           )}
-          <span><button className="del-com-btn" onClick={() => handleDeletePasteButton(snap.id)}>❌</button></span>
+          <span>
+            <button
+              className="del-com-btn"
+              onClick={() => handleDeletePasteButton(snap.id)}
+            >
+              ❌
+            </button>
+          </span>
         </p>
-        
+
         <p>
           {snap.body.slice(0, sliceLength)}
           <span>{fullBody}</span>
@@ -145,33 +163,33 @@ export default function MainContent(): JSX.Element {
               onChange={(e) => setCommentBody(e.target.value)}
               value={commentBody}
             ></textarea>
-            <button onClick={() => handleLeaveComment(snap.id, commentBody)}>
+            <button onClick={() => handleSubmitComment(snap.id, commentBody)}>
               📩
             </button>
           </div>
         )}
-        {/* {CommsVis &&  */}
-        <div>
-          <h3>Comments</h3>
-          {comments.map((el) => {
-            return (
-              <>
-                <p key={el.comment_id}>
-                  {el.comment_body}
-                  <span>
-                    <button
-                      className="del-com-btn"
-                      onClick={() => handleDeleteCommentButton(el.comment_id)}
-                    >
-                      🗑️
-                    </button>
-                  </span>
-                </p>
-              </>
-            );
-          })}
-        </div>
-        {/* } */}
+        {comments.length > 0 && CommsVis && (
+          <div>
+            <h3>Comments</h3>
+            {comments.map((el) => {
+              return (
+                <>
+                  <p key={el.comment_id}>
+                    {el.comment_body}
+                    <span>
+                      <button
+                        className="del-com-btn"
+                        onClick={() => handleDeleteCommentButton(el.comment_id)}
+                      >
+                        🗑️
+                      </button>
+                    </span>
+                  </p>
+                </>
+              );
+            })}
+          </div>
+        )}
         <hr />
       </div>
     );
@@ -180,7 +198,6 @@ export default function MainContent(): JSX.Element {
   useEffect(() => {
     getPastes();
     getAllComments();
-    console.log(allComments);
   }, [allData.length, allComments.length]);
 
   //GET pasteBins from API
